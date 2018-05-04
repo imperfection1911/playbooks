@@ -1,0 +1,15 @@
+---
+ - hosts: jmeter
+   tasks:
+   - name: install rsync
+     yum: name=rsync.x86_64 state=present
+   - name: copy module on host
+     synchronize: src=/data_storage/modules/{{proxy_module}} dest=/tmp/{{proxy_module}}
+   - name: deploy new
+     jbosscli: 
+       command: deploy --force /tmp/{{proxy_module}} 
+       cli_path: /esb/wildfly-10.1.0.Final/bin
+   - name: create config directory
+     file: path=/esb/wildfly-10.1.0.Final/standalone/configuration/iflex owner=esb group=esb mode=0774 state=directory
+   - name: push configuration
+     template: src=/etc/ansible/templates/data.import.properties.j2 dest=/esb/wildfly-10.1.0.Final/standalone/configuration/iflex/data.import.properties mode=0774 owner=esb group=esb

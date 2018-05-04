@@ -1,0 +1,47 @@
+---
+- hosts: jmeter
+  tasks:
+  - name: Install java8
+    yum: name=java-1.8.0-openjdk.x86_64 state=present
+  
+  - name: Install rsync
+    yum: name=rsync.x86_64 state=present
+  
+  - name: sync hosts
+    synchronize: src=/data_storage/hosts dest=/etc/
+
+ # - archive:
+ #     path: /data_storage/test0.csv
+ #     dest: /data_storage/test0.csv.tgz
+ #     remove: True
+ 
+  - name: load  test data file
+    synchronize: src=/data_storage/{{test_data_file}} dest=/opt/test.csv.tgz
+    #when: ansible_default_ipv4.address == "192.168.16.102"
+ 
+  - name: remove existing file
+    file: state=absent path=/opt/test.csv
+
+#  - name: set permissions
+#    file: path=/opt/test.csv.tgz mode=0775
+
+  - name: unzip 1 file
+    unarchive:
+      src: /opt/test.csv.tgz
+      dest: /opt/
+      remote_src: yes
+  
+  - name: remove archive
+    file: path=/opt/test.csv.tgz state=absent
+
+#  - name: load 2 test data file
+#    synchronize: src=/data_storage/test1.csv dest=/opt/test.csv
+#    when: ansible_default_ipv4.address == "192.168.16.103"
+
+#  - name: load 3 test data file
+#    synchronize: src=/data_storage/test2.csv dest=/opt/test.csv
+#    when: ansible_default_ipv4.address == "192.168.16.104"
+  
+#  - name: load 4 test data file
+#    synchronize: src=/data_storage/test3.csv dest=/opt/test.csv
+#    when: ansible_default_ipv4.address == "192.168.16.105"     

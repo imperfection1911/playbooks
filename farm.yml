@@ -1,0 +1,49 @@
+---
+ - hosts: farm
+   tasks:
+   - name: update system
+     yum: name='*' state='latest'
+   - name: install rsync
+     yum: name='rsync' state='latest'
+   - name: copy docker repo
+     synchronize: src=/etc/yum.repos.d/docker-ce.repo dest=/etc/yum.repos.d/docker-ce.repo
+   - name: install docker-ce
+     yum: name='docker-ce.x86_64' state='latest'
+   - name: enable docker
+     systemd: name=docker enabled=yes state=started
+   - name: install epel-release
+     yum: name=epel-release state=latest
+   - name: install pip
+     yum: name=python-pip state=latest
+   - name: install docker-py
+     pip: name="docker-py"
+   - name: install selinux-python
+     yum: name=libselinux-python state=latest
+   - name: create docker user
+     user: name=docker group=docker state=present system=yes shell=/sbin/nologin
+   - name:  fuck selinux
+     selinux: state=disabled
+   - name: create jenkins container directory
+     file: path=/var/jenkins_home state=directory owner=root group=root mode=777
+   - name: deploy hub container
+     docker_container:
+       name: selenium-hub
+       image: selenium/hub:3.11.0-californium
+       ports: "4444:4444"
+   - name: deploy selenium node
+     docker_container:
+       name: selenium-node
+       image: selenium/node-chrome:3.11.0-californium
+       links: "selenium-hub:hub"
+       volumes:
+        - /dev/shm:/dev/shm
+   - name: deploy jenkins container
+     docker_container: 
+       name: jenkins 
+       image: imperfection/jenkins 
+       ports:
+        - "8080:8080"
+        - "5000:5000"
+       links: "selenium-hub:selenium-hub"
+       volumes:
+        - /var/jenkins_home:/var/jenkins_home
