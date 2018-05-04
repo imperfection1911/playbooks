@@ -11,5 +11,11 @@
        cli_path: /esb/wildfly-10.1.0.Final/bin
    - name: create config directory
      file: path=/esb/wildfly-10.1.0.Final/standalone/configuration/iflex owner=esb group=esb mode=0774 state=directory
+   - name: create logs directory
+     file: path=/esb/wildfly-10.1.0.Final/standalone/log/results/{{ item }} state=directory owner=esb group=esb mode=0774
+     with_items:
+       - error
+       - request
+       - return
    - name: push configuration
      template: src=/etc/ansible/templates/data.import.properties.j2 dest=/esb/wildfly-10.1.0.Final/standalone/configuration/iflex/data.import.properties mode=0774 owner=esb group=esb
