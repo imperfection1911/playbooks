@@ -1,0 +1,61 @@
+---
+- hosts: dealer
+  tasks:
+  - name: Update
+    yum: name=* state=latest
+  - name: Install net-tools
+    yum: name=net-tools state=present
+  - name: Install mc
+    yum: name=mc state=present
+  - name: Install nano
+    yum: name=nano state=present
+  - name: Install mlocate
+    yum: name=mlocate state=present
+  - name: Install nmap
+    yum: name=nmap state=present
+  - name: Install iptables
+    yum: name=iptables-services state=present
+  - name: Install libselinux-python
+    yum: name=libselinux-python state=present
+  - name: Disable Selinux  
+    selinux: state=disabled
+  - name: Install epel-release
+    yum: name=epel-release state=present
+  #- name: Disable firewalld
+    #systemd: name=firewalld  enabled=no state=stopped ignore_errors=yes
+  - name: Make bash of regular user green
+    lineinfile: dest=/etc/skel/.bashrc insertafter="^fi" line="PS1='\[\e[0;32m\]\u\[\e[m\] \[\e[1;34m\]\w\[\e[m\] \[\e[1;32m\]\$\[\e[m\] ' " state=present
+  - name: Add user toha
+    user: createhome=yes group=wheel name=toha password=1qaz2wsx state=present
+  - name: Allow 'wheel' group to have passwordless sudo
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^%wheel'
+      line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+  - name: Copy motd
+    copy: src=/etc/motd dest=/etc/motd
+  - name: Install python3
+    yum: name=python34.x86_64 state=present
+  - name: Install python3 devel
+    yum: name=python34-devel.x86_64 state=present
+  - name: Install python3 libs
+    yum: name=python34-libs.x86_64 state=present
+  - name: Install freetds-devel
+    yum: name=freetds-devel.x86_64 state=present
+  - name: Install freetds
+    yum: name=freetds.x86_64 state=present
+  - name: Install pip
+    yum: name=python34-pip.noarch state=present
+  - name: Making symlink for pip
+    file: path=/usr/bin/pip
+          src=/usr/bin/pip3
+          state=link
+  - name: Install gcc
+    yum: name=gcc.x86_64 state=present
+  - name: Install pymssql
+    pip: name=pymssql version=2.1.1
+  - name: Install py-postgresql
+    pip: name=py-postgresql
+  - name: Make root bash red
+    lineinfile: dest=/root/.bashrc insertafter="^fi" line="PS1='\[\e[0;31m\]\u\[\e[m\] \[\e[1;34m\]\w\[\e[m\] \[\e[1;32m\]\$\[\e[m\] '" state=present
