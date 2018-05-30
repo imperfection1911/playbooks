@@ -1,0 +1,11 @@
+---
+ - hosts: jmeter
+   tasks:
+   - name: copy module on hosts
+     synchronize: src=/data_storage/modules/{{proxy_module}} dest=/tmp/{{proxy_module}}
+   - name: deploy new
+     jbosscli:
+       command: deploy --force /tmp/{{proxy_module}}
+       cli_path: /esb/wildfly-10.1.0.Final/bin
+   - name: restart wildfly
+     systemd: name=wildfly state=restarted   

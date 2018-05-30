@@ -1,0 +1,19 @@
+---
+ - hosts: jmeter
+   tasks:
+   - name: create partition
+     parted:
+       device: /dev/sdd
+       number: 1
+       flags: [ lvm ]
+       state: present
+   - name: extend volume group
+     lvg:
+       vg: cl
+       pvs: /dev/sdb1,/dev/sdc1,/dev/sdd1
+   - name: extend logical volume
+     lvol:
+       vg: cl
+       lv: /dev/cl/root
+       size: 100%PVS
+       resizefs: true

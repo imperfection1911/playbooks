@@ -1,0 +1,11 @@
+---
+ - hosts: jmeter
+   tasks:
+   - name: stop wildfly
+     systemd: name=wildfly state=stopped
+   - name:  add db drivers
+     blockinfile:
+      path: /esb/wildfly-10.1.0.Final/standalone/configuration/standalone.xml
+      marker: ""
+      insertafter: "</driver>"
+      block: "{{ lookup('file', '/etc/ansible/templates/drivers') }}"
