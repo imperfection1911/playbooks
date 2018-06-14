@@ -1,0 +1,17 @@
+---
+ - hosts: jmeter
+   tasks:
+   - name: disable root logging
+     jbosscli:
+       command: /subsystem=logging/root-logger=ROOT:write-attribute(name=level,value=OFF)
+       cli_path: {{jboss_cli_path}}
+   - name: change named formatter
+     jbosscli:
+       command: /subsystem=logging/size-rotating-file-handler={{ item }}:write-attribute(name=named-formatter, value=PATTERN)
+       cli_path: {{jboss_cli_path}}
+     with_items:
+       - Request
+       - ResponseError
+       - ResponseReturn
+   - name: restart wildfly
+     systemd: name=wildfly state=restarted
