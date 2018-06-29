@@ -1,0 +1,19 @@
+---
+ - hosts: esb
+   tasks: 
+   - name: change legal delay
+     lineinfile:
+       path: {{sync_config_path}} 
+       regexp: '^sync.delay.legal'
+       state: present
+       line: 'sync.delay.legal=10000'
+   - name: add agreement delay
+     lineinfile:
+       path: {{sync_config_path}}
+       insertafter: 'sync.delay.legal=10000'
+       line: 'sync.delay.legal_agreement=30000'
+   - name: add device group delay
+     lineinfile:
+       path: {{sync_config_path}}
+       insertafter: 'sync.delay.legal_agreement=30000'
+       line: 'sync.delay.device_group=30000'

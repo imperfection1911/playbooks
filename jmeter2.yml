@@ -8,7 +8,7 @@
     yum: name=rsync.x86_64 state=present
   
   - name: sync hosts
-    synchronize: src=/data_storage/hosts dest=/etc/
+    copy: src=/data_storage/hosts dest=/etc/
 
  # - archive:
  #     path: /data_storage/test0.csv
@@ -16,7 +16,7 @@
  #     remove: True
  
   - name: load  test data file
-    synchronize: src=/data_storage/{{test_data_file}} dest=/opt/test.csv.tgz
+    copy: src=/data_storage/{{test_data_file}} dest=/opt/test.csv.tgz
     #when: ansible_default_ipv4.address == "192.168.16.102"
  
   - name: remove existing file
@@ -33,6 +33,32 @@
   
   - name: remove archive
     file: path=/opt/test.csv.tgz state=absent
+    
+  - name: install epel-release
+    yum: name=epel-release state=latest
+  
+  - name: install pip
+    yum: name=python-pip state=latest
+   
+  - name: install docker-py
+    pip: name="docker-py"
+     
+  - name: stop jmeter
+    docker_container:
+      name: jmeter
+      state: absent
+  
+  - name: start jmeter
+    docker_container:
+       name: jmeter
+       image: imperfection/jmeter
+       ports:
+        - "55511:55511"
+        - "4000:4000"
+       volumes:
+        -  /opt/test.csv:/opt/test.csv
+       env:
+          SERVER_HOSTNAME: "{{ansible_default_ipv4.address}}"
 
 #  - name: load 2 test data file
 #    synchronize: src=/data_storage/test1.csv dest=/opt/test.csv
