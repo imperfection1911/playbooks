@@ -1,0 +1,22 @@
+---
+ - hosts: small_file_loader
+   tasks: 
+   - name: remove existing csv
+     file: path=/opt/test.csv state=absent
+   - name: stop jmeter
+     docker_container:
+       name: jmeter
+       state: absent
+   - name: copy csv file
+     copy: src="{{csv_file}}" dest=/opt/test.csv
+   - name: start jmeter
+     docker_container:
+       name: jmeter
+       image: imperfection/jmeter
+       ports: 
+        - "55511:55511"
+        - "4000:4000"
+       volumes:
+        - /opt/test.csv:/opt/test.csv
+       env:
+         SERVER_HOSTNAME: "{{ansible_default_ipv4.address}}"

@@ -1,0 +1,9 @@
+---
+ - hosts: proxy
+   tasks:
+   - name: archive_logs
+     command: tar -cvzf /esb/{{product}}{{ ansible_date_time.date }}.tar.gz /esb/wildfly-10.1.0.Final/standalone/log/results/
+   - name: clear_logs
+     command: find /esb/wildfly-10.1.0.Final/standalone/log/results/ -type f -delete
+   - name: restart wildfly
+     systemd: name=wildfly state=restarted
